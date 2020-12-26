@@ -1,0 +1,1 @@
+The Ethereum wallet contract for exchange
