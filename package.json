@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "truffle develop",
     "test": "truffle test",
     "build": "rimraf build/ && truffle compile",
     "fmt": "prettier -w contracts/*.sol"
