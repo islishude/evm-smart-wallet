@@ -120,13 +120,13 @@ contract("Controller", async ([alice, bob, carol]) => {
     // should flush ether successfully
     {
       const tx = await this.instance.flushEther([newaddr], { from: alice });
-      // let hasFlushEtherEvent = tx.receipt.rawLogs.some(
-      //   (l) => l.topics[0] === web3.utils.sha3("FlushEther(address,uint256)")
-      // );
-      // expect(hasFlushEtherEvent).to.be.equal(
-      //   true,
-      //   "should has FlushEther event"
-      // );
+      let hasFlushEtherEvent = tx.receipt.rawLogs.some(
+        (l) => l.topics[0] === web3.utils.sha3("FlushEther(address,uint256)")
+      );
+      expect(hasFlushEtherEvent).to.be.equal(
+        true,
+        "should has FlushEther event"
+      );
 
       // const newReplica = await Replica.at(newaddr);
       // expectEvent(tx, "FlushEther", { receiver: B, amount: "200" }); // TODO: truffle bug
