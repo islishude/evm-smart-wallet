@@ -10,6 +10,7 @@ const ERC20 = artifacts.require("ERC20");
 const Replica = artifacts.require("Replica");
 
 const B = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
+const C = "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC";
 
 const newReplicaAddress = (ins, salt) => {
   const codehash = web3.utils.sha3(Replica.bytecode);
@@ -65,19 +66,18 @@ contract("Controller", async ([alice, bob, carol]) => {
   });
 
   it("should call flushEther successfully", async () => {
-    it("should call by owner", async () => {
-      const tx = this.instance.flushEther([newaddr], { from: carol });
-      expectRevert(tx, "403");
-    });
-
-    it("should create replica at first", async () => {
-      const c = "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC";
-      const tx = this.instance.flushEther([c], { from: alice });
-      expectRevert(tx, "unknown target");
-    });
-
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
+
+    {
+      const tx = this.instance.flushEther([C], { from: alice });
+      expectRevert(tx, "unknown target", "should create replica at first");
+    }
+
+    {
+      const tx = this.instance.flushEther([newaddr], { from: carol });
+      expectRevert(tx, "403", "should call by owner");
+    }
 
     // should create replica successfully
     {
@@ -85,22 +85,28 @@ contract("Controller", async ([alice, bob, carol]) => {
       expectEvent(tx, "Create", { 0: newaddr });
       expect(await this.instance.replicas(newaddr)).to.be.equal(
         true,
-        "the new address should store in replicas map"
+        "the new address should be saved in replicas map"
       );
     }
 
     const newReplica = await Replica.at(newaddr);
 
-    // should send successfuly to the address
     {
       const tx = await newReplica.send("100", { from: carol });
-      expectEvent(tx, "Deposit", { sender: carol, amount: "100" });
+      expectEvent(
+        tx,
+        "Deposit",
+        { sender: carol, amount: "100" },
+        "should send successfuly to the address"
+      );
     }
 
-    // balance should be 200 at now
     {
       const Balance = await web3.eth.getBalance(newaddr);
-      expect(Balance).to.be.equal("100", "balance should be 100 after tx_3");
+      expect(Balance).to.be.equal(
+        "100",
+        "balance should be 100 after after deposit"
+      );
     }
 
     // should flush ether successfully
@@ -131,29 +137,32 @@ contract("Controller", async ([alice, bob, carol]) => {
       );
 
       const balOfB = await web3.eth.getBalance(B);
-      expect(balOfB).to.be.equal("100", "B's balance should be 100 after tx_3");
+      expect(balOfB).to.be.equal("100", "B's balance should be 100 at last");
     }
   });
 
   it("should call flushERC20Token successfully", async () => {
-    it("should call by owner", async () => {
-      const tx = this.instance.flushEther([newaddr], { from: carol });
-      expectRevert(tx, "403");
-    });
-
-    it("should create replica at first", async () => {
-      const c = "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC";
-      const tx = this.instance.flushEther([c], { from: alice });
-      expectRevert(tx, "unknown target");
-    });
+    {
+      const tx = this.instance.flushEther([C], { from: alice });
+      expectRevert(tx, "unknown target", "should create replica at first");
+    }
 
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
 
-    // should create replica successfully
+    {
+      const tx = this.instance.flushEther([newaddr], { from: carol });
+      expectRevert(tx, "403", "should call by owner");
+    }
+
     {
       const tx = await this.instance.create([salt], { from: alice });
-      expectEvent(tx, "Create", { 0: newaddr });
+      expectEvent(
+        tx,
+        "Create",
+        { 0: newaddr },
+        "should create replica successfully"
+      );
       expect(await this.instance.replicas(newaddr)).to.be.equal(
         true,
         "the new address should store in replicas map"
@@ -166,20 +175,20 @@ contract("Controller", async ([alice, bob, carol]) => {
     const balToken_1 = await token.balanceOf(newaddr);
     expect(balToken_1.toString()).to.be.equal(
       "100",
-      "balance of token should be 100"
+      "newaddr's token balance should be 100 after sent"
     );
 
     await this.instance.flushERC20Token(token.address, [newaddr], 1);
     const balToken_2 = await token.balanceOf(newaddr);
     expect(balToken_2.toString()).to.be.equal(
       "0",
-      "balance of token should be 100"
+      "newaddr's token balance should be 100 ast last"
     );
 
     const balToken_3 = await token.balanceOf(B);
     expect(balToken_3.toString()).to.be.equal(
       "100",
-      "balance of token should be 100"
+      "B's token balance should be 100 at last"
     );
   });
 });
