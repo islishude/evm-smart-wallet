@@ -1,17 +1,22 @@
 {
-  "name": "truffle-test",
+  "name": "eth-create2-wallet",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "truffle develop",
     "test": "truffle test",
     "build": "rimraf build/ && truffle compile",
     "fmt": "prettier -w contracts/*.sol"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "ethereum"
+  ],
+  "author": "islishude <islishude@gmail.com>",
+  "private": true,
+  "license": "MIT",
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.10",
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.2",
     "rimraf": "^3.0.2",
