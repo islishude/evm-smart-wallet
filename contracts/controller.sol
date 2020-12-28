@@ -23,6 +23,10 @@ contract Controller {
     owner = msg.sender;
   }
 
+  /**
+   * @notice create new replica addresses
+   * @param salts the salt list for create2
+   */
   function create(bytes32[] calldata salts) external OnlyOwner {
     for (uint256 i = 0; i < salts.length; i++) {
       Replica created = new Replica{ salt: salts[i] }();
@@ -31,6 +35,10 @@ contract Controller {
     }
   }
 
+  /**
+   * @notice collect ethers
+   * @param targets the replica list to transfer ethers
+   */
   function flushEther(Replica[] calldata targets) external OnlyOwner {
     for (uint256 i = 0; i < targets.length; i++) {
       Replica target = targets[i];
@@ -40,10 +48,10 @@ contract Controller {
   }
 
   /**
-   * @notice flush ERC20 Token
-   * @param token 代币地址
-   * @param targets 需要转移代币余额的目标地址
-   * @param checkres 是否验证 ERC20.transfer() 返回值，通常情况下需要验证，但如果代币合约提供了返回值，但始终返回 false 特殊合约则不能验证
+   * @notice collect ERC20 tokens
+   * @param token the ERC20 token address
+   * @param targets the replica list to collect
+   * @param checkres verify return of ERC20.transfer() or not,you should give true unless token.transfer() always return false
    */
   function flushERC20Token(
     address token,
@@ -66,6 +74,12 @@ contract Controller {
     }
   }
 
+  /**
+   * @notice call any for a replica address
+   * @param token the address to call by replica
+   * @param target the replica address
+   * @param params abi encoded call data
+   */
   function dispatch(
     address token,
     Replica target,
