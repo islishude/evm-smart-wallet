@@ -191,4 +191,21 @@ contract("Controller", async ([alice, bob, carol]) => {
       "B's token balance should be 100 at last"
     );
   });
+
+  it("should call dispatch successfully", async () => {
+    {
+      const tx = this.instance.dispatch(C, C, "0x", { from: carol });
+      expectRevert(tx, "403", "should call by owner");
+    }
+
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+    {
+      const tx = this.instance.dispatch(C, newaddr, "0x", { from: alice });
+      expectRevert(tx, "unknown target", "should create replica at first");
+    }
+
+    await this.instance.create([salt], { from: alice });
+    await this.instance.dispatch(C, newaddr, "0x", { from: alice });
+  });
 });
