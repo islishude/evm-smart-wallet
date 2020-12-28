@@ -7,14 +7,18 @@ The Ethereum wallet contract for centralized crypto-currency exchange
 
 # Why and How?
 
-On centralized cryptocurrency exchanges, each user has their own address to top up their Ether or ERC20 tokens(e.g. USDT).
+on centralized cryptocurrency exchanges, each user has their own address to top up their Ether or ERC20 tokens(e.g. USDT).
 
-If a user just tops up ERC20 tokens, but not ETH,if the wallet wants to collect these tokens into one address, it needs to first transfer some ETH as miner fee.
+if a user just tops up ERC20 tokens, but not ETH,if the wallet wants to collect these tokens into one address, it needs to first transfer some ETH as miner fee.
 
-But the ETH of the cost is estimated and may be more than what is actually needed.
+but the ETH of the cost is estimated and may be more than what is actually needed.
 
-In the long run, the address of users will have many exceptionally small dust ETH.
+in the long run, the address of users will have many exceptionally small dust ETH.
 
-This program solves this unavoidable problems.
+this program solves this unavoidable problems.
 
-You can check out [this blog](https://github.com/islishude/blog/issues/221) to get it.
+the deposit addresses are not created by the private key but by [CREATE2](https://eips.ethereum.org/EIPS/eip-1014),and the address with permissions could call function to transfer tokens.
+
+so the operation of paying the fee is diverted to other address.
+
+You can find out more by reading [this blog](https://github.com/islishude/blog/issues/221).
