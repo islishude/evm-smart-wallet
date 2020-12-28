@@ -1,9 +1,11 @@
-The Ethereum wallet contract for centralized crypto-currency exchange
+The Ethereum wallet contract for centralized crypto-currency exchange 
+
+[![Test](https://github.com/islishude/eth-create2-wallet/workflows/test/badge.svg?branch=main)]()
 
 # Features
 
 1. No ether dust for collecting ERC20 tokens
-2. Better way to check internal ether deposit tx
+2. Better way to check internal ether deposit
 
 # Why and How?
 
