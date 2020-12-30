@@ -86,6 +86,11 @@ contract Controller {
     bytes calldata params
   ) external payable OnlyOwner returns (bytes memory data) {
     require(replicas[target], "unknown target");
+    require(
+      token.codehash !=
+        0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470,
+      "not contract"
+    );
     return target.dispatch{ value: msg.value }(token, params, 0);
   }
 }

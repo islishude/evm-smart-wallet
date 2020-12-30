@@ -15,11 +15,11 @@ if a user just tops up ERC20 tokens, but not ETH,if the wallet wants to collect 
 
 but the ETH of the cost is estimated and may be more than what is actually needed.
 
-in the long run, the address of users will have many exceptionally small dust ETH.
+in the long run, the address of users will have many small ETH dust.
 
 this program solves this unavoidable problems.
 
-the deposit addresses are not created by the private key but by [CREATE2](https://eips.ethereum.org/EIPS/eip-1014),and the address with permissions could call function to transfer tokens.
+the deposit address is not created by the private key but a contract by [CREATE2](https://eips.ethereum.org/EIPS/eip-1014),and the address with permissions can call deposit contract to transfer tokens.
 
 so the operation of paying the fee is diverted to other address.
 

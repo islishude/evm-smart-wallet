@@ -6,14 +6,18 @@ const ERC20 = artifacts.require("ERC20");
 
 contract("Replica", async ([alice, bob, carol]) => {
   beforeEach(async () => {
-    this.instance = await Replica.new({ from: alice });
+    try {
+      this.instance = await Replica.new({ from: alice });
+    } catch (err) {
+      console.log("create instance error:", err);
+    }
   });
 
   it("should receive ether and emit Deposit", async () => {
     const tx = await this.instance.send("100", { from: carol });
     expectEvent(tx, "Deposit", { sender: carol, amount: "100" });
     const balance = await web3.eth.getBalance(this.instance.address);
-    expect(balance).to.be.equal("100");
+    expect(balance).to.be.equal("100", "balance should be 100 now");
   });
 
   it("should revert with 403", async () => {
@@ -31,6 +35,18 @@ contract("Replica", async ([alice, bob, carol]) => {
     expectEvent(tx, "FlushEther", { receiver: R, amount: "100" });
     expect(await web3.eth.getBalance(this.instance.address)).to.be.equal("0");
     expect(await web3.eth.getBalance(R)).to.be.equal("100");
+  });
+
+  it("should dispatch for ERC20 failed: 400", async () => {
+    const token = await ERC20.new({ from: alice });
+    const param = web3.eth.abi.encodeFunctionCall(
+      token.abi.filter(
+        (v) => v.name === "transfer" && v.type === "function"
+      )[0],
+      [carol, 100]
+    );
+    const tx = this.instance.dispatch(token.address, param, 0);
+    expectRevert(tx, "400", "should dispatch failed");
   });
 
   it("should dispatch for ERC20 successfully", async () => {
