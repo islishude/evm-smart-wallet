@@ -5,12 +5,8 @@ const Replica = artifacts.require("Replica");
 const ERC20 = artifacts.require("ERC20");
 
 contract("Replica", async ([alice, bob, carol]) => {
-  beforeEach(async () => {
-    try {
-      this.instance = await Replica.new({ from: alice });
-    } catch (err) {
-      console.log("create instance error:", err);
-    }
+  beforeEach(async (done) => {
+    this.instance = await Replica.new({ from: alice });
   });
 
   it("should receive ether and emit Deposit", async () => {

@@ -20,11 +20,7 @@ const newReplicaAddress = (ins, salt) => {
 
 contract("Controller", async ([alice, bob, carol]) => {
   beforeEach(async () => {
-    try {
-      this.instance = await Controller.new(B, { from: alice });
-    } catch (err) {
-      console.log(err);
-    }
+    this.instance = await Controller.new(B, { from: alice });
   });
 
   it("should construct contract correct", async () => {
@@ -225,18 +221,18 @@ contract("Controller", async ([alice, bob, carol]) => {
     expectRevert(tx, "not contract", "should dispatch with a contract");
   });
 
-  // it("should call dispatch successfully...", async () => {
-  // const salt = "0x" + randomBytes(32).toString("hex");
-  // const newaddr = newReplicaAddress(this.instance.address, salt);
-  // await this.instance.create([salt], { from: alice });
-  // const token = await ERC20.new({ from: alice });
-  // await token.transfer(newaddr, "100", { from: alice });
-  // const param = web3.eth.abi.encodeFunctionCall(
-  //   token.abi.filter(
-  //     (v) => v.name === "transfer" && v.type === "function"
-  //   )[0],
-  //   [carol, 100]
-  // );
-  // await this.instance.dispatch(token.address, newaddr, param);
-  // });
+  it("should call dispatch successfully...", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+    await this.instance.create([salt], { from: alice });
+    const token = await ERC20.new({ from: alice });
+    await token.transfer(newaddr, "100", { from: alice });
+    const param = web3.eth.abi.encodeFunctionCall(
+      token.abi.filter(
+        (v) => v.name === "transfer" && v.type === "function"
+      )[0],
+      [carol, 100]
+    );
+    await this.instance.dispatch(token.address, newaddr, param);
+  });
 });
