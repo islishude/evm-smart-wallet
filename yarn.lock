@@ -794,12 +794,12 @@ cacheable-request@^6.0.0:
     responselike "^1.0.2"
 
 call-bind@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/call-bind/-/call-bind-1.0.0.tgz#24127054bb3f9bdcb4b1fb82418186072f77b8ce"
-  integrity sha512-AEXsYIyyDY3MCzbwdhzG3Jx1R0J2wetQyUynn6dYHAO+bg8l1k7jwZtRv4ryryFs7EP+NDlikJlVe59jr0cM2w==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/call-bind/-/call-bind-1.0.1.tgz#29aca9151f8ddcfd5b9b786898f005f425e88567"
+  integrity sha512-tvAvUwNcRikl3RVF20X9lsYmmepsovzTWeJiXjO0PkJp15uy/6xKFZOQtuiSULwYW+6ToZBprphCgWXC2dSgcQ==
   dependencies:
     function-bind "^1.1.1"
-    get-intrinsic "^1.0.0"
+    get-intrinsic "^1.0.2"
 
 camelcase@^4.1.0:
   version "4.1.0"
@@ -1798,7 +1798,7 @@ get-func-name@^2.0.0:
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
   integrity sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=
 
-get-intrinsic@^1.0.0, get-intrinsic@^1.0.1:
+get-intrinsic@^1.0.1, get-intrinsic@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.0.2.tgz#6820da226e50b24894e08859469dc68361545d49"
   integrity sha512-aeX0vrFm21ILl3+JpFFRNe9aUvp6VFZb2/CTbgLb8j75kOhvoNYjt9d8KA/tJG4gSo8nzEDedRl0h7vDmBYRVg==
@@ -3507,10 +3507,10 @@ tough-cookie@~2.5.0:
     psl "^1.1.28"
     punycode "^2.1.1"
 
-truffle@^5.1.58:
-  version "5.1.58"
-  resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.1.58.tgz#3202bc080ef71c811fe9181bfc47fff944afab62"
-  integrity sha512-BnMSq9+0vUj6B8OODs/U/cV7MiyNrKOKmeO1fhn2LOvN6XpOd06Qitw0V15lNxlCL+datx2WEZ9AnYql689bnQ==
+truffle@^5.1.61:
+  version "5.1.61"
+  resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.1.61.tgz#d040528e008b69bf90ef414c18474a2a222b96f7"
+  integrity sha512-RweRttrSz28u1YZDF6sIbdC5jVsfDh9jv9LN1saHPzYnul3RNuwmxQ6Iuoi9FB2lkfjZTEE+6SdSSV8ybT8UoA==
   dependencies:
     app-module-path "^2.2.0"
     mocha "8.1.2"

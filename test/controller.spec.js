@@ -2,7 +2,11 @@
 
 const { randomBytes } = require("crypto");
 
-const { expectRevert, expectEvent } = require("@openzeppelin/test-helpers");
+const {
+  expectRevert,
+  expectEvent,
+  constants: { ZERO_ADDRESS },
+} = require("@openzeppelin/test-helpers");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 const Controller = artifacts.require("Controller");
@@ -28,18 +32,18 @@ contract("Controller", async ([alice, bob, carol]) => {
     expect(await this.instance.receiver()).to.equal(B);
   });
 
-  it("should call create() and revert by 403", () => {
+  it("should call create() and revert by 403", async () => {
     const bytes32 = "0x" + randomBytes(32).toString("hex");
     const tx = this.instance.create([bytes32], { from: bob });
-    expectRevert(tx, "403");
+    await expectRevert(tx, "403");
   });
 
-  it("should call create() and revert", () => {
+  it("should call create() and revert", async () => {
     const bytes32 = "0x" + randomBytes(32).toString("hex");
     const tx = this.instance.create([bytes32, bytes32], {
       from: alice,
     });
-    expectRevert(tx, "revert");
+    await expectRevert(tx, "revert");
   });
 
   it("should call create() successfully", async () => {
@@ -61,14 +65,14 @@ contract("Controller", async ([alice, bob, carol]) => {
 
   it("should call flushEther failed: should create replica at first", async () => {
     const tx = this.instance.flushEther([C], { from: alice });
-    expectRevert(tx, "unknown target", "should create replica at first");
+    await expectRevert(tx, "unknown target", "should create replica at first");
   });
 
   it("should call flushEther failed: should call by owner", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
     const tx = this.instance.flushEther([newaddr], { from: carol });
-    expectRevert(tx, "403", "should call by owner");
+    await expectRevert(tx, "403", "should call by owner");
   });
 
   it("should call flushEther successfully and saved new address in replicas map", async () => {
@@ -143,7 +147,7 @@ contract("Controller", async ([alice, bob, carol]) => {
 
   it("should call flushERC20 faiiled: should create replica at first", async () => {
     const tx = this.instance.flushEther([C], { from: alice });
-    expectRevert(tx, "unknown target", "should create replica at first");
+    await expectRevert(tx, "unknown target", "should create replica at first");
   });
 
   it("should call flushERC20 faiiled: should call by owner", async () => {
@@ -151,7 +155,7 @@ contract("Controller", async ([alice, bob, carol]) => {
     const newaddr = newReplicaAddress(this.instance.address, salt);
 
     const tx = this.instance.flushEther([newaddr], { from: carol });
-    expectRevert(tx, "403", "should call by owner");
+    await expectRevert(tx, "403", "should call by owner");
   });
 
   it("should call flushERC20Token successfully and saved address in replicas map", async () => {
@@ -202,23 +206,25 @@ contract("Controller", async ([alice, bob, carol]) => {
 
   it("should call dispatch failed: should call by owner", async () => {
     const tx = this.instance.dispatch(C, C, "0x", { from: carol });
-    expectRevert(tx, "403", "should call by owner");
+    await expectRevert(tx, "403", "should call by owner");
   });
 
   it("should call dispatch failed: should create replica at first", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
     const tx = this.instance.dispatch(C, newaddr, "0x", { from: alice });
-    expectRevert(tx, "unknown target", "should create replica at first");
+    await expectRevert(tx, "unknown target", "should create replica at first");
   });
 
-  it("should call dispatch failed: should dispatch with a contract", async () => {
+  it("should call dispatch failed: dispatch with an external address", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
     await this.instance.create([salt], { from: alice });
 
-    const tx = this.instance.dispatch(C, newaddr, "0x", { from: alice });
-    expectRevert(tx, "not contract", "should dispatch with a contract");
+    const tx = this.instance.dispatch(C, newaddr, "0x", {
+      from: alice,
+    });
+    await expectRevert(tx, "not contract");
   });
 
   it("should call dispatch successfully...", async () => {

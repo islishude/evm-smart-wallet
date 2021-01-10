@@ -5,7 +5,7 @@ const Replica = artifacts.require("Replica");
 const ERC20 = artifacts.require("ERC20");
 
 contract("Replica", async ([alice, bob, carol]) => {
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     this.instance = await Replica.new({ from: alice });
   });
 
@@ -18,7 +18,7 @@ contract("Replica", async ([alice, bob, carol]) => {
 
   it("should revert with 403", async () => {
     const tx = this.instance.dispatch(alice, "0x", 1, { from: bob });
-    expectRevert(tx, "403");
+    await expectRevert(tx, "403");
   });
 
   it("should dispatch for ether successfully", async () => {
@@ -42,7 +42,7 @@ contract("Replica", async ([alice, bob, carol]) => {
       [carol, 100]
     );
     const tx = this.instance.dispatch(token.address, param, 0);
-    expectRevert(tx, "400", "should dispatch failed");
+    await expectRevert(tx, "400", "should dispatch failed");
   });
 
   it("should dispatch for ERC20 successfully", async () => {

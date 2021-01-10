@@ -20,7 +20,7 @@
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.2",
     "rimraf": "^3.0.2",
-    "truffle": "^5.1.58"
+    "truffle": "^5.1.61"
   },
   "dependencies": {}
 }
