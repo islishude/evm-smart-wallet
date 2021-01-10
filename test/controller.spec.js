@@ -2,7 +2,11 @@
 
 const { randomBytes } = require("crypto");
 
-const { expectRevert, expectEvent } = require("@openzeppelin/test-helpers");
+const {
+  expectRevert,
+  expectEvent,
+  constants: { ZERO_ADDRESS },
+} = require("@openzeppelin/test-helpers");
 const { web3 } = require("@openzeppelin/test-helpers/src/setup");
 
 const Controller = artifacts.require("Controller");
@@ -28,18 +32,18 @@ contract("Controller", async ([alice, bob, carol]) => {
     expect(await this.instance.receiver()).to.equal(B);
   });
 
-  it("should call create() and revert by 403", () => {
+  it("should call create() and revert by 403", async () => {
     const bytes32 = "0x" + randomBytes(32).toString("hex");
     const tx = this.instance.create([bytes32], { from: bob });
-    expectRevert(tx, "403");
+    await expectRevert(tx, "403");
   });
 
-  it("should call create() and revert", () => {
+  it("should call create() and revert", async () => {
     const bytes32 = "0x" + randomBytes(32).toString("hex");
     const tx = this.instance.create([bytes32, bytes32], {
       from: alice,
     });
-    expectRevert(tx, "revert");
+    await expectRevert(tx, "revert");
   });
 
   it("should call create() successfully", async () => {
@@ -47,15 +51,9 @@ contract("Controller", async ([alice, bob, carol]) => {
     const expectAddrs = [];
 
     for (let i = 0; i < 10; i++) {
-      const random32 = "0x" + randomBytes(32).toString("hex");
-      params.push(random32);
-      const hash = web3.utils.soliditySha3(
-        "0xff",
-        this.instance.address,
-        random32,
-        web3.utils.sha3(Replica.bytecode)
-      );
-      expectAddrs.push(web3.utils.toChecksumAddress("0x" + hash.slice(-40)));
+      const salt = "0x" + randomBytes(32).toString("hex");
+      expectAddrs.push(newReplicaAddress(this.instance.address, salt));
+      params.push(salt);
     }
     const tx = await this.instance.create(params, { from: alice });
 
@@ -65,29 +63,35 @@ contract("Controller", async ([alice, bob, carol]) => {
     }
   });
 
+  it("should call flushEther failed: should create replica at first", async () => {
+    const tx = this.instance.flushEther([C], { from: alice });
+    await expectRevert(tx, "unknown target", "should create replica at first");
+  });
+
+  it("should call flushEther failed: should call by owner", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+    const tx = this.instance.flushEther([newaddr], { from: carol });
+    await expectRevert(tx, "403", "should call by owner");
+  });
+
+  it("should call flushEther successfully and saved new address in replicas map", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+
+    const tx = await this.instance.create([salt], { from: alice });
+    expectEvent(tx, "Create", { 0: newaddr });
+    expect(await this.instance.replicas(newaddr)).to.be.equal(
+      true,
+      "the new address should be saved in replicas map"
+    );
+  });
+
   it("should call flushEther successfully", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
 
-    {
-      const tx = this.instance.flushEther([C], { from: alice });
-      expectRevert(tx, "unknown target", "should create replica at first");
-    }
-
-    {
-      const tx = this.instance.flushEther([newaddr], { from: carol });
-      expectRevert(tx, "403", "should call by owner");
-    }
-
-    // should create replica successfully
-    {
-      const tx = await this.instance.create([salt], { from: alice });
-      expectEvent(tx, "Create", { 0: newaddr });
-      expect(await this.instance.replicas(newaddr)).to.be.equal(
-        true,
-        "the new address should be saved in replicas map"
-      );
-    }
+    await this.instance.create([salt], { from: alice });
 
     const newReplica = await Replica.at(newaddr);
 
@@ -141,33 +145,41 @@ contract("Controller", async ([alice, bob, carol]) => {
     }
   });
 
-  it("should call flushERC20Token successfully", async () => {
-    {
-      const tx = this.instance.flushEther([C], { from: alice });
-      expectRevert(tx, "unknown target", "should create replica at first");
-    }
+  it("should call flushERC20 faiiled: should create replica at first", async () => {
+    const tx = this.instance.flushEther([C], { from: alice });
+    await expectRevert(tx, "unknown target", "should create replica at first");
+  });
 
+  it("should call flushERC20 faiiled: should call by owner", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
 
-    {
-      const tx = this.instance.flushEther([newaddr], { from: carol });
-      expectRevert(tx, "403", "should call by owner");
-    }
+    const tx = this.instance.flushEther([newaddr], { from: carol });
+    await expectRevert(tx, "403", "should call by owner");
+  });
 
-    {
-      const tx = await this.instance.create([salt], { from: alice });
-      expectEvent(
-        tx,
-        "Create",
-        { 0: newaddr },
-        "should create replica successfully"
-      );
-      expect(await this.instance.replicas(newaddr)).to.be.equal(
-        true,
-        "the new address should store in replicas map"
-      );
-    }
+  it("should call flushERC20Token successfully and saved address in replicas map", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+
+    const tx = await this.instance.create([salt], { from: alice });
+    expectEvent(
+      tx,
+      "Create",
+      { 0: newaddr },
+      "should create replica successfully"
+    );
+    expect(await this.instance.replicas(newaddr)).to.be.equal(
+      true,
+      "the new address should be saved in replicas map"
+    );
+  });
+
+  it("should call flushERC20Token successfully", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+
+    await this.instance.create([salt], { from: alice });
 
     const token = await ERC20.new({ from: carol });
     await token.transfer(newaddr, "100", { from: carol });
@@ -192,20 +204,41 @@ contract("Controller", async ([alice, bob, carol]) => {
     );
   });
 
-  it("should call dispatch successfully", async () => {
-    {
-      const tx = this.instance.dispatch(C, C, "0x", { from: carol });
-      expectRevert(tx, "403", "should call by owner");
-    }
+  it("should call dispatch failed: should call by owner", async () => {
+    const tx = this.instance.dispatch(C, C, "0x", { from: carol });
+    await expectRevert(tx, "403", "should call by owner");
+  });
 
+  it("should call dispatch failed: should create replica at first", async () => {
     const salt = "0x" + randomBytes(32).toString("hex");
     const newaddr = newReplicaAddress(this.instance.address, salt);
-    {
-      const tx = this.instance.dispatch(C, newaddr, "0x", { from: alice });
-      expectRevert(tx, "unknown target", "should create replica at first");
-    }
+    const tx = this.instance.dispatch(C, newaddr, "0x", { from: alice });
+    await expectRevert(tx, "unknown target", "should create replica at first");
+  });
 
+  it("should call dispatch failed: dispatch with an external address", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
     await this.instance.create([salt], { from: alice });
-    await this.instance.dispatch(C, newaddr, "0x", { from: alice });
+
+    const tx = this.instance.dispatch(C, newaddr, "0x", {
+      from: alice,
+    });
+    await expectRevert(tx, "not contract");
+  });
+
+  it("should call dispatch successfully...", async () => {
+    const salt = "0x" + randomBytes(32).toString("hex");
+    const newaddr = newReplicaAddress(this.instance.address, salt);
+    await this.instance.create([salt], { from: alice });
+    const token = await ERC20.new({ from: alice });
+    await token.transfer(newaddr, "100", { from: alice });
+    const param = web3.eth.abi.encodeFunctionCall(
+      token.abi.filter(
+        (v) => v.name === "transfer" && v.type === "function"
+      )[0],
+      [carol, 100]
+    );
+    await this.instance.dispatch(token.address, newaddr, param);
   });
 });

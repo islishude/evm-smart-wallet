@@ -24,7 +24,7 @@ contract Controller {
   }
 
   /**
-   * @notice create new replica addresses
+   * @dev create new replica addresses
    * @param salts the salt list for create2
    */
   function create(bytes32[] calldata salts) external OnlyOwner {
@@ -36,7 +36,7 @@ contract Controller {
   }
 
   /**
-   * @notice collect ethers
+   * @dev collect ethers
    * @param targets the replica list to transfer ethers
    */
   function flushEther(Replica[] calldata targets) external OnlyOwner {
@@ -48,7 +48,7 @@ contract Controller {
   }
 
   /**
-   * @notice collect ERC20 tokens
+   * @dev collect ERC20 tokens
    * @param token the ERC20 token address
    * @param targets the replica list to collect
    * @param checkres verify return of ERC20.transfer() or not,you should give true unless token.transfer() always return false
@@ -75,7 +75,7 @@ contract Controller {
   }
 
   /**
-   * @notice call any for a replica address
+   * @dev call any for a replica address
    * @param token the address to call by replica
    * @param target the replica address
    * @param params abi encoded call data
@@ -86,6 +86,10 @@ contract Controller {
     bytes calldata params
   ) external payable OnlyOwner returns (bytes memory data) {
     require(replicas[target], "unknown target");
+    bytes32 emptyHash32 =
+      0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+    bytes32 codehash = token.codehash;
+    require(codehash != 0x0 && codehash != emptyHash32, "not contract");
     return target.dispatch{ value: msg.value }(token, params, 0);
   }
 }
