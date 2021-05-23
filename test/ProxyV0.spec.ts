@@ -109,9 +109,9 @@ describe("ProxyV0", () => {
         .connect(other)
         .transferERC20TokenWithFeeBurned(
           memeToken.address,
+          replica.address,
           other.address,
-          true,
-          [{ replica: replica.address, value: 9800 }]
+          9800
         )
     ).to.revertedWith("403");
 
@@ -121,9 +121,9 @@ describe("ProxyV0", () => {
     expect(
       await proxy.transferERC20TokenWithFeeBurned(
         memeToken.address,
+        replica.address,
         other.address,
-        true,
-        [{ replica: replica.address, value: 9800 }]
+        9800
       )
     )
       .to.emit(proxy, "TokenTransferFeeBurn")

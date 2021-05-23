@@ -13,11 +13,4 @@ interface IProxyV1 is IProxy {
         bool checkres,
         address[] calldata replicas
     ) external;
-
-    function flushERC20TokenWithFeeBurned(
-        address token,
-        address receiver,
-        bool checkres,
-        address[] calldata replicas
-    ) external;
 }

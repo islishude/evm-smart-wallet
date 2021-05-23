@@ -58,40 +58,6 @@ contract ProxyV1 is IProxyV1 {
         }
     }
 
-    function flushERC20TokenWithFeeBurned(
-        address token,
-        address receiver,
-        bool checkres,
-        address[] calldata replicas
-    ) external override OnlyOwner {
-        uint256 balanceAtFirst = IERC20(token).balanceOf(receiver);
-        uint256 transferAmount = 0;
-        for (uint256 i = 0; i < replicas.length; i++) {
-            address replica = replicas[i];
-            uint256 balance = IERC20(token).balanceOf(replica);
-            bytes memory input =
-                abi.encodeWithSelector(
-                    IERC20.transfer.selector,
-                    receiver,
-                    balance
-                );
-            bytes memory result = IReplica(replica).dispatch(token, 0, input);
-            if (checkres) {
-                require(
-                    (result.length == 0 || abi.decode(result, (bool))),
-                    "ERC20_TRANSFER_FAILED"
-                );
-            }
-            transferAmount += balance;
-        }
-        uint256 balanceAtLast = IERC20(token).balanceOf(receiver);
-        uint256 feeBurndAmount =
-            balanceAtFirst + transferAmount - balanceAtLast;
-        if (feeBurndAmount > 0) {
-            emit TokenTransferFeeBurn(token, receiver, feeBurndAmount);
-        }
-    }
-
     function dispatch(
         address token,
         address replica,
