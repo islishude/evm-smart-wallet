@@ -1,8 +1,9 @@
-import { keccak256 } from "@ethersproject/keccak256";
 import { Wallet } from "@ethersproject/wallet";
 import { expect } from "chai";
 import { ethers, waffle } from "hardhat";
-import { Controller } from "../types";
+import { Controller, Replica } from "../types";
+import { abi as ReplicaABI } from "../artifacts/contracts/Replica.sol/Replica.json";
+import { Contract } from "@ethersproject/contracts";
 
 describe("Controller", () => {
   const loadFixture = waffle.createFixtureLoader(
@@ -59,7 +60,7 @@ describe("Controller", () => {
     const genaddr = ethers.utils.getCreate2Address(
       controller.address,
       salt,
-      keccak256(initcode)
+      ethers.utils.keccak256(initcode)
     );
 
     expect(await controller.predictReplica(salt)).to.eq(
@@ -75,5 +76,11 @@ describe("Controller", () => {
     expect(await controller.createReplica([salt]), "createReplica")
       .to.be.emit(controller, "CreateReplica")
       .withArgs(genaddr);
+
+    // TODO: https://github.com/nomiclabs/hardhat/issues/1135
+    // expect("initial").to.calledOnContractWith(genaddr, [controller.address]);
+
+    const newReplica = new Contract(genaddr, ReplicaABI, wallet) as Replica;
+    expect(await newReplica.controller()).to.eq(controller.address);
   });
 });

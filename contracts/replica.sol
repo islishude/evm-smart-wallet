@@ -6,7 +6,7 @@ import "./interfaces/IReplica.sol";
 import "./interfaces/IController.sol";
 
 contract Replica is IReplica {
-    address internal controller;
+    address public controller;
 
     function initial(address _controller) external override {
         require(controller == address(0));
