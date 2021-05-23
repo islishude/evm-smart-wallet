@@ -124,8 +124,8 @@ contract Proxy is IProxy {
                     IERC1155.safeTransferFrom.selector,
                     target,
                     receiver,
-                    balance,
                     tokenId,
+                    balance,
                     new bytes(0)
                 );
             IReplica(target).dispatch(token, 0, input);
