@@ -7,7 +7,7 @@ import "./Replica.sol";
 import "./interfaces/IController.sol";
 import "./interfaces/IReplica.sol";
 
-contract Factory is IController {
+contract Controller is IController {
     using Clones for address;
 
     address public override owner;

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/IProxyV0.sol";
 
 contract Proxy is IProxyV0 {
-    uint256 constant VERSION = 0;
+    uint256 public constant override VERSION = 0;
 
     address public override owner;
 

@@ -2,11 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-interface IProxyV1 {
-    event TokenTransferFeeBurn(address, address, uint256);
+import "./IProxy.sol";
 
-    function owner() external returns (address);
-
+interface IProxyV1 is IProxy {
     function flushEther(address receiver, address[] calldata targets) external;
 
     function flushERC20Token(
@@ -36,10 +34,4 @@ interface IProxyV1 {
         address receiver,
         uint256 tokenId
     ) external;
-
-    function dispatch(
-        address token,
-        address target,
-        bytes calldata input
-    ) external payable returns (bytes memory result);
 }
