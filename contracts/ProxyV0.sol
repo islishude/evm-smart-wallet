@@ -46,7 +46,11 @@ contract Proxy is IProxyV0 {
         for (uint256 i = 0; i < payments.length; i++) {
             Payment calldata payment = payments[i];
             bytes memory input =
-                abi.encodeWithSelector(0xa9059cbb, receiver, payment.value);
+                abi.encodeWithSelector(
+                    IERC20.transfer.selector,
+                    receiver,
+                    payment.value
+                );
             bytes memory result =
                 IReplica(payment.target).dispatch(token, 0, input);
             if (checkres) {
@@ -100,7 +104,12 @@ contract Proxy is IProxyV0 {
     ) external override OnlyOwner {
         // function transferFrom(address from, address to, uint256 tokenId) external;
         bytes memory input =
-            abi.encodeWithSelector(0x23b872dd, target, receiver, tokenId);
+            abi.encodeWithSelector(
+                IERC721.transferFrom.selector,
+                target,
+                receiver,
+                tokenId
+            );
         IReplica(target).dispatch(token, 0, input);
     }
 
@@ -115,7 +124,7 @@ contract Proxy is IProxyV0 {
             Payment calldata payment = payments[i];
             bytes memory input =
                 abi.encodeWithSelector(
-                    0xf242432a,
+                    IERC1155.safeTransferFrom.selector,
                     payment.target,
                     receiver,
                     payment.value,
