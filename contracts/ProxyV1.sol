@@ -92,46 +92,6 @@ contract ProxyV1 is IProxyV1 {
         }
     }
 
-    function transferERC721Token(
-        address token,
-        address replica,
-        address receiver,
-        uint256 tokenId
-    ) external override OnlyOwner {
-        //  function transferFrom(address from, address to, uint256 tokenId) external;
-        bytes memory input =
-            abi.encodeWithSelector(
-                IERC721.transferFrom.selector,
-                replica,
-                receiver,
-                tokenId
-            );
-        IReplica(replica).dispatch(token, 0, input);
-    }
-
-    function flushERC1155Token(
-        address token,
-        address receiver,
-        uint256 tokenId,
-        address[] calldata replicas
-    ) external override OnlyOwner {
-        // function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-        for (uint256 i = 0; i < replicas.length; i++) {
-            address replica = replicas[i];
-            uint256 balance = IERC1155(token).balanceOf(replica, tokenId);
-            bytes memory input =
-                abi.encodeWithSelector(
-                    IERC1155.safeTransferFrom.selector,
-                    replica,
-                    receiver,
-                    tokenId,
-                    balance,
-                    new bytes(0)
-                );
-            IReplica(replica).dispatch(token, 0, input);
-        }
-    }
-
     function dispatch(
         address token,
         address replica,

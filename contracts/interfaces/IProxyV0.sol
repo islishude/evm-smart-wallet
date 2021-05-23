@@ -26,18 +26,4 @@ interface IProxyV0 is IProxy {
         bool checkres,
         Payment[] calldata payments
     ) external;
-
-    function transferERC721Token(
-        address token,
-        address replica,
-        address receiver,
-        uint256 tokenId
-    ) external;
-
-    function transferIERC1155Token(
-        address token,
-        address receiver,
-        uint256 tokenId,
-        Payment[] calldata payments
-    ) external;
 }

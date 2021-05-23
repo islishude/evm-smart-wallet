@@ -20,18 +20,4 @@ interface IProxyV1 is IProxy {
         bool checkres,
         address[] calldata replicas
     ) external;
-
-    function flushERC1155Token(
-        address token,
-        address receiver,
-        uint256 tokenId,
-        address[] calldata replicas
-    ) external;
-
-    function transferERC721Token(
-        address token,
-        address replica,
-        address receiver,
-        uint256 tokenId
-    ) external;
 }
