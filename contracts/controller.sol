@@ -14,6 +14,8 @@ contract Controller is IController {
 
     address public override proxy;
 
+    address public immutable override implementation = address(new Replica());
+
     modifier OnlyOwner {
         require(msg.sender == owner, "403");
         _;
@@ -24,15 +26,13 @@ contract Controller is IController {
         proxy = _proxy;
     }
 
-    address internal replicaImpl = address(new Replica());
-
     function createReplica(bytes32[] calldata salts)
         external
         override
         OnlyOwner
     {
         for (uint256 i = 0; i < salts.length; i++) {
-            address forwarder = replicaImpl.cloneDeterministic(salts[i]);
+            address forwarder = implementation.cloneDeterministic(salts[i]);
             IReplica(forwarder).initial(address(this));
             emit CreateReplica(forwarder);
         }
@@ -44,7 +44,7 @@ contract Controller is IController {
         override
         returns (address)
     {
-        return replicaImpl.predictDeterministicAddress(salt, address(this));
+        return implementation.predictDeterministicAddress(salt, address(this));
     }
 
     function changeProxy(address _proxy) external override OnlyOwner {

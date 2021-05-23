@@ -8,6 +8,8 @@ interface IController {
 
     function owner() external returns (address);
 
+    function implementation() external returns (address);
+
     function proxy() external returns (address);
 
     function createReplica(bytes32[] calldata salts) external;
