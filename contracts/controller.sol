@@ -24,7 +24,7 @@ contract Controller is IController {
         proxy = _proxy;
     }
 
-    address internal impl = address(new Replica());
+    address internal replicaImpl = address(new Replica());
 
     function createReplica(bytes32[] calldata salts)
         external
@@ -32,7 +32,7 @@ contract Controller is IController {
         OnlyOwner
     {
         for (uint256 i = 0; i < salts.length; i++) {
-            address forwarder = impl.cloneDeterministic(salts[i]);
+            address forwarder = replicaImpl.cloneDeterministic(salts[i]);
             IReplica(forwarder).initial(address(this));
             emit CreateReplica(forwarder);
         }
@@ -44,7 +44,7 @@ contract Controller is IController {
         override
         returns (address)
     {
-        return impl.predictDeterministicAddress(salt, address(this));
+        return replicaImpl.predictDeterministicAddress(salt, address(this));
     }
 
     function changeProxy(address _proxy) external override OnlyOwner {

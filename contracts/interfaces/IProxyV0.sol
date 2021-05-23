@@ -6,7 +6,7 @@ import "./IProxy.sol";
 
 interface IProxyV0 is IProxy {
     struct Payment {
-        address target;
+        address replica;
         uint256 value;
     }
 
@@ -29,7 +29,7 @@ interface IProxyV0 is IProxy {
 
     function transferERC721Token(
         address token,
-        address target,
+        address replica,
         address receiver,
         uint256 tokenId
     ) external;

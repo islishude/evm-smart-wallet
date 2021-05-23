@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/IProxyV0.sol";
 
-contract Proxy is IProxyV0 {
+contract ProxyV0 is IProxyV0 {
     uint256 public constant override VERSION = 0;
 
     address public override owner;
@@ -29,7 +29,7 @@ contract Proxy is IProxyV0 {
     {
         for (uint256 i = 0; i < payments.length; i++) {
             Payment calldata payment = payments[i];
-            IReplica(payment.target).dispatch(
+            IReplica(payment.replica).dispatch(
                 receiver,
                 payment.value,
                 new bytes(0)
@@ -52,7 +52,7 @@ contract Proxy is IProxyV0 {
                     payment.value
                 );
             bytes memory result =
-                IReplica(payment.target).dispatch(token, 0, input);
+                IReplica(payment.replica).dispatch(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
@@ -79,7 +79,7 @@ contract Proxy is IProxyV0 {
                     payment.value
                 );
             bytes memory result =
-                IReplica(payment.target).dispatch(token, 0, input);
+                IReplica(payment.replica).dispatch(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
@@ -98,7 +98,7 @@ contract Proxy is IProxyV0 {
 
     function transferERC721Token(
         address token,
-        address target,
+        address replica,
         address receiver,
         uint256 tokenId
     ) external override OnlyOwner {
@@ -106,11 +106,11 @@ contract Proxy is IProxyV0 {
         bytes memory input =
             abi.encodeWithSelector(
                 IERC721.transferFrom.selector,
-                target,
+                replica,
                 receiver,
                 tokenId
             );
-        IReplica(target).dispatch(token, 0, input);
+        IReplica(replica).dispatch(token, 0, input);
     }
 
     function transferIERC1155Token(
@@ -125,21 +125,21 @@ contract Proxy is IProxyV0 {
             bytes memory input =
                 abi.encodeWithSelector(
                     IERC1155.safeTransferFrom.selector,
-                    payment.target,
+                    payment.replica,
                     receiver,
                     payment.value,
                     tokenId,
                     new bytes(0)
                 );
-            IReplica(payment.target).dispatch(token, 0, input);
+            IReplica(payment.replica).dispatch(token, 0, input);
         }
     }
 
     function dispatch(
         address token,
-        address target,
+        address replica,
         bytes calldata input
     ) external payable override OnlyOwner returns (bytes memory result) {
-        return IReplica(target).dispatch(token, msg.value, input);
+        return IReplica(replica).dispatch(token, msg.value, input);
     }
 }

@@ -11,7 +11,7 @@ interface IProxy {
 
     function dispatch(
         address token,
-        address target,
+        address replica,
         bytes calldata input
     ) external payable returns (bytes memory result);
 }
