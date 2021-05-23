@@ -6,10 +6,10 @@ import "./interfaces/IReplica.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "./interfaces/IProxyV1.sol";
+import "./interfaces/IProxyV0.sol";
 
-contract Proxy is IProxyV1 {
-    uint256 constant VERSION = 1;
+contract Proxy is IProxyV0 {
+    uint256 constant VERSION = 0;
 
     address public override owner;
 
@@ -22,33 +22,33 @@ contract Proxy is IProxyV1 {
         owner = _owner;
     }
 
-    function flushEther(address receiver, address[] calldata targets)
+    function transferEther(address receiver, Payment[] calldata payments)
         external
         override
         OnlyOwner
     {
-        for (uint256 i = 0; i < targets.length; i++) {
-            address target = targets[i];
-            IReplica(target).dispatch(receiver, target.balance, new bytes(0));
+        for (uint256 i = 0; i < payments.length; i++) {
+            Payment calldata payment = payments[i];
+            IReplica(payment.target).dispatch(
+                receiver,
+                payment.value,
+                new bytes(0)
+            );
         }
     }
 
-    function flushERC20Token(
+    function transferERC20Token(
         address token,
         address receiver,
         bool checkres,
-        address[] calldata targets
+        Payment[] calldata payments
     ) external override OnlyOwner {
-        for (uint256 i = 0; i < targets.length; i++) {
-            address target = targets[i];
-            uint256 balance = IERC20(token).balanceOf(target);
+        for (uint256 i = 0; i < payments.length; i++) {
+            Payment calldata payment = payments[i];
             bytes memory input =
-                abi.encodeWithSelector(
-                    IERC20.transfer.selector,
-                    receiver,
-                    balance
-                );
-            bytes memory result = IReplica(target).dispatch(token, 0, input);
+                abi.encodeWithSelector(0xa9059cbb, receiver, payment.value);
+            bytes memory result =
+                IReplica(payment.target).dispatch(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
@@ -58,31 +58,31 @@ contract Proxy is IProxyV1 {
         }
     }
 
-    function flushERC20TokenWithFeeBurned(
+    function transferERC20TokenWithFeeBurned(
         address token,
         address receiver,
         bool checkres,
-        address[] calldata targets
+        Payment[] calldata payments
     ) external override OnlyOwner {
         uint256 balanceAtFirst = IERC20(token).balanceOf(receiver);
         uint256 transferAmount = 0;
-        for (uint256 i = 0; i < targets.length; i++) {
-            address target = targets[i];
-            uint256 balance = IERC20(token).balanceOf(target);
+        for (uint256 i = 0; i < payments.length; i++) {
+            Payment calldata payment = payments[i];
             bytes memory input =
                 abi.encodeWithSelector(
                     IERC20.transfer.selector,
                     receiver,
-                    balance
+                    payment.value
                 );
-            bytes memory result = IReplica(target).dispatch(token, 0, input);
+            bytes memory result =
+                IReplica(payment.target).dispatch(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
                     "ERC20_TRANSFER_FAILED"
                 );
             }
-            transferAmount += balance;
+            transferAmount += payment.value;
         }
         uint256 balanceAtLast = IERC20(token).balanceOf(receiver);
         uint256 feeBurndAmount =
@@ -98,37 +98,31 @@ contract Proxy is IProxyV1 {
         address receiver,
         uint256 tokenId
     ) external override OnlyOwner {
-        //  function transferFrom(address from, address to, uint256 tokenId) external;
+        // function transferFrom(address from, address to, uint256 tokenId) external;
         bytes memory input =
-            abi.encodeWithSelector(
-                IERC721.transferFrom.selector,
-                target,
-                receiver,
-                tokenId
-            );
+            abi.encodeWithSelector(0x23b872dd, target, receiver, tokenId);
         IReplica(target).dispatch(token, 0, input);
     }
 
-    function flushERC1155Token(
+    function transferIERC1155Token(
         address token,
         address receiver,
         uint256 tokenId,
-        address[] calldata targets
+        Payment[] calldata payments
     ) external override OnlyOwner {
         // function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-        for (uint256 i = 0; i < targets.length; i++) {
-            address target = targets[i];
-            uint256 balance = IERC1155(token).balanceOf(target, tokenId);
+        for (uint256 i = 0; i < payments.length; i++) {
+            Payment calldata payment = payments[i];
             bytes memory input =
                 abi.encodeWithSelector(
-                    IERC1155.safeTransferFrom.selector,
-                    target,
+                    0xf242432a,
+                    payment.target,
                     receiver,
+                    payment.value,
                     tokenId,
-                    balance,
                     new bytes(0)
                 );
-            IReplica(target).dispatch(token, 0, input);
+            IReplica(payment.target).dispatch(token, 0, input);
         }
     }
 
