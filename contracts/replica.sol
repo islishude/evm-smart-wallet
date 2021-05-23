@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "./interfaces/IReplica.sol";
 import "./interfaces/IController.sol";
@@ -14,12 +14,12 @@ contract Replica is IReplica {
     }
 
     function dispatch(
-        address replica,
+        address target,
         uint256 value,
         bytes calldata input
     ) external override returns (bytes memory) {
         require(msg.sender == IController(controller).proxy(), "403");
-        (bool success, bytes memory data) = replica.call{value: value}(input);
+        (bool success, bytes memory data) = target.call{value: value}(input);
         require(success, "dispach failed");
         return data;
     }

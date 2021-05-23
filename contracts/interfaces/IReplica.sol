@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 interface IReplica {
     function dispatch(
-        address replica,
+        address target,
         uint256 value,
-        bytes calldata params
+        bytes calldata input
     ) external returns (bytes memory);
 
     function initial(address _factory) external;
