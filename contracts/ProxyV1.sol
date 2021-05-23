@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 
 import "./interfaces/IReplica.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/IProxy.sol";
 
 contract Proxy is IProxy {
@@ -18,19 +20,6 @@ contract Proxy is IProxy {
 
     constructor(address _owner) {
         owner = _owner;
-    }
-
-    function ERC20Balance(address _token, address _account)
-        internal
-        view
-        returns (uint256)
-    {
-        (bool success, bytes memory data) =
-            _token.staticcall(
-                abi.encodeWithSelector(IERC20.balanceOf.selector, _account)
-            );
-        require(success && data.length >= 32);
-        return abi.decode(data, (uint256));
     }
 
     function flushEther(address receiver, address[] calldata targets)
@@ -52,7 +41,7 @@ contract Proxy is IProxy {
     ) external override OnlyOwner {
         for (uint256 i = 0; i < targets.length; i++) {
             address target = targets[i];
-            uint256 balance = ERC20Balance(token, target);
+            uint256 balance = IERC20(token).balanceOf(target);
             bytes memory input =
                 abi.encodeWithSelector(
                     IERC20.transfer.selector,
@@ -75,11 +64,11 @@ contract Proxy is IProxy {
         bool checkres,
         address[] calldata targets
     ) external override OnlyOwner {
-        uint256 balanceAtFirst = ERC20Balance(token, receiver);
+        uint256 balanceAtFirst = IERC20(token).balanceOf(receiver);
         uint256 transferAmount = 0;
         for (uint256 i = 0; i < targets.length; i++) {
             address target = targets[i];
-            uint256 balance = ERC20Balance(token, target);
+            uint256 balance = IERC20(token).balanceOf(target);
             bytes memory input =
                 abi.encodeWithSelector(
                     IERC20.transfer.selector,
@@ -95,11 +84,51 @@ contract Proxy is IProxy {
             }
             transferAmount += balance;
         }
-        uint256 balanceAtLast = ERC20Balance(token, receiver);
+        uint256 balanceAtLast = IERC20(token).balanceOf(receiver);
         uint256 feeBurndAmount =
             balanceAtLast - balanceAtFirst - transferAmount;
         if (feeBurndAmount > 0) {
             emit TokenTransferFeeBurn(token, receiver, feeBurndAmount);
+        }
+    }
+
+    function transferERC721Token(
+        address token,
+        address target,
+        address receiver,
+        uint256 tokenId
+    ) external override OnlyOwner {
+        //  function transferFrom(address from, address to, uint256 tokenId) external;
+        bytes memory input =
+            abi.encodeWithSelector(
+                IERC721.transferFrom.selector,
+                target,
+                receiver,
+                tokenId
+            );
+        IReplica(target).dispatch(token, 0, input);
+    }
+
+    function flushERC1155Token(
+        address token,
+        address receiver,
+        uint256 tokenId,
+        address[] calldata targets
+    ) external override OnlyOwner {
+        // function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
+        for (uint256 i = 0; i < targets.length; i++) {
+            address target = targets[i];
+            uint256 balance = IERC1155(token).balanceOf(target, tokenId);
+            bytes memory input =
+                abi.encodeWithSelector(
+                    IERC1155.safeTransferFrom.selector,
+                    target,
+                    receiver,
+                    balance,
+                    tokenId,
+                    new bytes(0)
+                );
+            IReplica(target).dispatch(token, 0, input);
         }
     }
 
