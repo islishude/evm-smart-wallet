@@ -3,13 +3,14 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IReplica.sol";
+import "./interfaces/IController.sol";
 
 contract Replica is IReplica {
-    address internal factory;
+    address internal controller;
 
-    function initial(address _factory) external override {
-        require(factory == address(0));
-        factory = _factory;
+    function initial(address _controller) external override {
+        require(controller == address(0));
+        controller = _controller;
     }
 
     function dispatch(
@@ -17,7 +18,7 @@ contract Replica is IReplica {
         uint256 value,
         bytes calldata input
     ) external override returns (bytes memory) {
-        require(msg.sender == factory, "403");
+        require(msg.sender == IController(controller).proxy(), "403");
         (bool success, bytes memory data) = target.call{value: value}(input);
         require(success, "dispach failed");
         return data;
