@@ -4,8 +4,6 @@ pragma solidity ^0.8.4;
 
 import "./interfaces/IReplica.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./interfaces/IProxyV0.sol";
 
 contract ProxyV0 is IProxyV0 {
