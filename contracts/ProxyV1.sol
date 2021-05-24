@@ -29,7 +29,7 @@ contract ProxyV1 is IProxyV1 {
     {
         for (uint256 i = 0; i < replicas.length; i++) {
             address replica = replicas[i];
-            IReplica(replica).dispatch(receiver, replica.balance, new bytes(0));
+            IReplica(replica).invoke(receiver, replica.balance, new bytes(0));
         }
     }
 
@@ -48,7 +48,7 @@ contract ProxyV1 is IProxyV1 {
                     receiver,
                     balance
                 );
-            bytes memory result = IReplica(replica).dispatch(token, 0, input);
+            bytes memory result = IReplica(replica).invoke(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
@@ -58,11 +58,11 @@ contract ProxyV1 is IProxyV1 {
         }
     }
 
-    function dispatch(
+    function invoke(
         address token,
         address replica,
         bytes calldata input
     ) external payable override OnlyOwner returns (bytes memory result) {
-        return IReplica(replica).dispatch(token, msg.value, input);
+        return IReplica(replica).invoke(token, msg.value, input);
     }
 }

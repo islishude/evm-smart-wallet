@@ -9,7 +9,7 @@ interface IProxy {
 
     function owner() external returns (address);
 
-    function dispatch(
+    function invoke(
         address token,
         address replica,
         bytes calldata input

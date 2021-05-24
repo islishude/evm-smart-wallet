@@ -29,7 +29,7 @@ contract ProxyV0 is IProxyV0 {
     {
         for (uint256 i = 0; i < payments.length; i++) {
             Payment calldata payment = payments[i];
-            IReplica(payment.replica).dispatch(
+            IReplica(payment.replica).invoke(
                 receiver,
                 payment.value,
                 new bytes(0)
@@ -52,7 +52,7 @@ contract ProxyV0 is IProxyV0 {
                     payment.value
                 );
             bytes memory result =
-                IReplica(payment.replica).dispatch(token, 0, input);
+                IReplica(payment.replica).invoke(token, 0, input);
             if (checkres) {
                 require(
                     (result.length == 0 || abi.decode(result, (bool))),
@@ -71,7 +71,7 @@ contract ProxyV0 is IProxyV0 {
         uint256 balanceAtFirst = IERC20(token).balanceOf(receiver);
         bytes memory input =
             abi.encodeWithSelector(IERC20.transfer.selector, receiver, value);
-        bytes memory result = IReplica(replica).dispatch(token, 0, input);
+        bytes memory result = IReplica(replica).invoke(token, 0, input);
         require(
             (result.length == 0 || abi.decode(result, (bool))),
             "ERC20_TRANSFER_FAILED"
@@ -83,11 +83,11 @@ contract ProxyV0 is IProxyV0 {
         }
     }
 
-    function dispatch(
+    function invoke(
         address token,
         address replica,
         bytes calldata input
     ) external payable override OnlyOwner returns (bytes memory result) {
-        return IReplica(replica).dispatch(token, msg.value, input);
+        return IReplica(replica).invoke(token, msg.value, input);
     }
 }

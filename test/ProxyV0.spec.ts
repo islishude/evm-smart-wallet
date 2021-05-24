@@ -136,9 +136,9 @@ describe("ProxyV0", () => {
     const { proxy, replica, other, testToken } = await loadFixture(fixture);
 
     await expect(
-      proxy.connect(other).dispatch(other.address, replica.address, "0x")
+      proxy.connect(other).invoke(other.address, replica.address, "0x")
     ).to.revertedWith("403");
 
-    await proxy.dispatch(other.address, replica.address, "0x");
+    await proxy.invoke(other.address, replica.address, "0x");
   });
 });

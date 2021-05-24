@@ -13,14 +13,14 @@ contract Replica is IReplica {
         controller = _controller;
     }
 
-    function dispatch(
+    function invoke(
         address target,
         uint256 value,
         bytes calldata input
     ) external override returns (bytes memory) {
         require(msg.sender == IController(controller).proxy(), "403");
         (bool success, bytes memory data) = target.call{value: value}(input);
-        require(success, "dispach failed");
+        require(success, "invoke failed");
         return data;
     }
 

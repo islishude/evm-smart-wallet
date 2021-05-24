@@ -47,8 +47,8 @@ describe("Replica", () => {
     await replica.initial(mockController.address);
     await mockController.mock.proxy.returns(wallet.address);
     await expect(
-      replica.connect(other).dispatch(wallet.address, 0, "0x")
+      replica.connect(other).invoke(wallet.address, 0, "0x")
     ).to.revertedWith("403");
-    await replica.dispatch(wallet.address, 0, "0x");
+    await replica.invoke(wallet.address, 0, "0x");
   });
 });

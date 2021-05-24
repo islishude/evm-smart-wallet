@@ -3,7 +3,7 @@
 pragma solidity ^0.8.4;
 
 interface IReplica {
-    function dispatch(
+    function invoke(
         address target,
         uint256 value,
         bytes calldata input
