@@ -20,7 +20,7 @@ interface IProxyV0 is IProxy {
         Payment[] calldata payments
     ) external;
 
-    function transferERC20TokenWithFeeBurned(
+    function transferFeeBurnERC20Token(
         address token,
         address replica,
         address receiver,

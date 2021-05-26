@@ -101,13 +101,13 @@ describe("ProxyV0", () => {
     expect(await testToken.balanceOf(other.address)).to.eq(10000);
   });
 
-  it("transferERC20TokenWithFeeBurned", async () => {
+  it("transferFeeBurnERC20Token", async () => {
     const { proxy, replica, other, memeToken } = await loadFixture(fixture);
 
     await expect(
       proxy
         .connect(other)
-        .transferERC20TokenWithFeeBurned(
+        .transferFeeBurnERC20Token(
           memeToken.address,
           replica.address,
           other.address,
@@ -119,7 +119,7 @@ describe("ProxyV0", () => {
     expect(await memeToken.balanceOf(replica.address)).to.eq(9800);
 
     expect(
-      await proxy.transferERC20TokenWithFeeBurned(
+      await proxy.transferFeeBurnERC20Token(
         memeToken.address,
         replica.address,
         other.address,
@@ -132,8 +132,8 @@ describe("ProxyV0", () => {
     expect(await memeToken.balanceOf(other.address)).to.eq(9604);
   });
 
-  it("dispatch", async () => {
-    const { proxy, replica, other, testToken } = await loadFixture(fixture);
+  it("invoke", async () => {
+    const { proxy, replica, other } = await loadFixture(fixture);
 
     await expect(
       proxy.connect(other).invoke(other.address, replica.address, "0x")

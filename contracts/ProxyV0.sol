@@ -60,7 +60,7 @@ contract ProxyV0 is IProxyV0 {
         }
     }
 
-    function transferERC20TokenWithFeeBurned(
+    function transferFeeBurnERC20Token(
         address token,
         address replica,
         address receiver,
