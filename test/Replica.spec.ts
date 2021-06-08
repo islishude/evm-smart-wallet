@@ -41,6 +41,18 @@ describe("Replica", () => {
     ).to.changeEtherBalance(replica, 100);
   });
 
+  it("payable fallback", async () => {
+    const { replica, wallet } = await loadFixture(fixture);
+    await expect(
+      await wallet.sendTransaction({
+        to: replica.address,
+        value: 100,
+        gasLimit: 30000,
+        data: "0xa9059cbb00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      })
+    ).to.changeEtherBalance(replica, 100);
+  });
+
   it("dispatch", async () => {
     const { replica, wallet, other } = await loadFixture(fixture);
     const mockController = await deployMockContract(wallet, ControllerABI);

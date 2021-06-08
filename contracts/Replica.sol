@@ -5,6 +5,8 @@ pragma solidity ^0.8.4;
 import "./interfaces/IReplica.sol";
 import "./interfaces/IController.sol";
 
+// Replica is not a forworder
+
 contract Replica is IReplica {
     address public controller;
 
@@ -23,6 +25,8 @@ contract Replica is IReplica {
         require(success, "invoke failed");
         return data;
     }
+
+    fallback() external payable {}
 
     receive() external payable {}
 }
