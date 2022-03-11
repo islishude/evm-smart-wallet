@@ -2,28 +2,33 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./Replica.sol";
-import "./interfaces/IController.sol";
-import "./interfaces/IReplica.sol";
 
 contract Controller is IController {
-    using Clones for address;
-
     address public override owner;
 
     address public override proxy;
 
-    address public immutable override implementation = address(new Replica());
+    address public override implementation;
 
-    modifier OnlyOwner {
+    bytes32 public replicaCodeHash =
+        keccak256(abi.encodePacked(type(Replica).creationCode));
+
+    mapping(address => bool) public override wallets;
+
+    modifier OnlyOwner() {
         require(msg.sender == owner, "403");
         _;
     }
 
-    constructor(address _owner, address _proxy) {
+    constructor(
+        address _owner,
+        address _proxy,
+        address _implemention
+    ) {
         owner = _owner;
         proxy = _proxy;
+        implementation = _implemention;
     }
 
     function createReplica(bytes32[] calldata salts)
@@ -32,9 +37,8 @@ contract Controller is IController {
         OnlyOwner
     {
         for (uint256 i = 0; i < salts.length; i++) {
-            address forwarder = implementation.cloneDeterministic(salts[i]);
-            IReplica(forwarder).initial(address(this));
-            emit CreateReplica(forwarder);
+            Replica replica = new Replica{salt: salts[i]}();
+            emit CreateReplica(address(replica));
         }
     }
 
@@ -44,11 +48,33 @@ contract Controller is IController {
         override
         returns (address)
     {
-        return implementation.predictDeterministicAddress(salt, address(this));
+        return
+            address(
+                bytes20(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            address(this),
+                            salt,
+                            replicaCodeHash
+                        )
+                    )
+                )
+            );
     }
 
     function changeProxy(address _proxy) external override OnlyOwner {
         proxy = _proxy;
         emit ChangeProxy(_proxy);
+    }
+
+    function changeImplemention(address _proxy) external override OnlyOwner {
+        proxy = _proxy;
+        emit ChangeProxy(_proxy);
+    }
+
+    function setWallet(address _wallet, bool _yes) external override OnlyOwner {
+        wallets[_wallet] = _yes;
+        emit SetWallet(_wallet, _yes);
     }
 }

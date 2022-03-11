@@ -13,7 +13,7 @@ describe("Controller", () => {
 
   async function fixture([wallet, other]: Wallet[]) {
     const tmp = await ethers.getContractFactory("Controller");
-    const controller = await tmp.deploy(wallet.address, other.address);
+    const controller = await tmp.deploy(wallet.address, other.address, other.address);
     return { controller: controller as Controller, wallet, other };
   }
 
