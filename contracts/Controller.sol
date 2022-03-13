@@ -11,7 +11,7 @@ contract Controller is IController {
 
     address public override implementation;
 
-    bytes32 public replicaCodeHash =
+    bytes32 public constant override replicaCodeHash =
         keccak256(abi.encodePacked(type(Replica).creationCode));
 
     mapping(address => bool) public override wallets;
@@ -48,19 +48,10 @@ contract Controller is IController {
         override
         returns (address)
     {
-        return
-            address(
-                bytes20(
-                    keccak256(
-                        abi.encodePacked(
-                            hex"ff",
-                            address(this),
-                            salt,
-                            replicaCodeHash
-                        )
-                    )
-                )
-            );
+        bytes32 _data = keccak256(
+            abi.encodePacked(bytes1(0xff), address(this), salt, replicaCodeHash)
+        );
+        return address(uint160(uint256(_data)));
     }
 
     function changeProxy(address _proxy) external override OnlyOwner {

@@ -12,6 +12,8 @@ interface IController {
 
     function proxy() external returns (address);
 
+    function replicaCodeHash() external returns (bytes32);
+
     function wallets(address) external returns (bool);
 
     function implementation() external returns (address);
@@ -24,8 +26,5 @@ interface IController {
 
     function setWallet(address _wallet, bool _yes) external;
 
-    function predictReplica(bytes32 salt)
-        external
-        view
-        returns (address);
+    function predictReplica(bytes32 salt) external view returns (address);
 }

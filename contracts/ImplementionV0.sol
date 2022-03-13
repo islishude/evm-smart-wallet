@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.4;
 
-import "./interfaces/IERC20.sol";
 import "./interfaces/IImplements.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ImplmentionV0 is IImplenmentionV0 {
     address internal immutable current = address(this);

@@ -7,14 +7,17 @@ import "./interfaces/IController.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 contract Replica {
-    bytes32 constant CONTROLLER_SLOT = bytes32(uint256(keccak256("islishude.wallet.controller")) - 1);
+    bytes32 constant CONTROLLER_SLOT =
+        bytes32(uint256(keccak256("islishude.wallet.controller")) - 1);
 
     constructor() {
         StorageSlot.getAddressSlot(CONTROLLER_SLOT).value = msg.sender;
     }
 
     fallback() external payable {
-        IController controller = IController(StorageSlot.getAddressSlot(CONTROLLER_SLOT).value);
+        IController controller = IController(
+            StorageSlot.getAddressSlot(CONTROLLER_SLOT).value
+        );
         require(msg.sender == controller.proxy(), "only proxy");
         address target = controller.implementation();
         // solhint-disable-next-line no-inline-assembly

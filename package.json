@@ -9,10 +9,7 @@
     "clean": "rimraf artifacts cache types",
     "precompile": "yarn clean",
     "compile": "hardhat compile",
-    "pretest": "yarn compile",
-    "test": "hardhat test --verbose",
-    "test:only": "hardhat test",
-    "prepublishOnly": "yarn test"
+    "test": "hardhat test"
   },
   "keywords": [
     "ethereum"
