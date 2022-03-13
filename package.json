@@ -7,9 +7,10 @@
     "lint": "prettier --check test contracts",
     "lint:fix": "prettier --write test contracts",
     "clean": "rimraf artifacts cache types",
-    "precompile": "yarn clean",
-    "compile": "hardhat compile",
-    "test": "hardhat test"
+    "pretest": "yarn compile",
+    "test": "hardhat test --verbose",
+    "test:only": "hardhat test",
+    "prepublishOnly": "yarn test"
   },
   "keywords": [
     "ethereum"
