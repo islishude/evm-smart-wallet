@@ -2,31 +2,42 @@
 
 pragma solidity ^0.8.4;
 
-import "./interfaces/IReplica.sol";
 import "./interfaces/IController.sol";
 
-// Replica is not a forworder
+import "@openzeppelin/contracts/utils/StorageSlot.sol";
 
-contract Replica is IReplica {
-    address public controller;
+contract Replica {
+    bytes32 constant CONTROLLER_SLOT =
+        bytes32(uint256(keccak256("islishude.wallet.controller")) - 1);
 
-    function initial(address _controller) external override {
-        require(controller == address(0));
-        controller = _controller;
+    constructor() {
+        StorageSlot.getAddressSlot(CONTROLLER_SLOT).value = msg.sender;
     }
 
-    function invoke(
-        address target,
-        uint256 value,
-        bytes calldata input
-    ) external override returns (bytes memory) {
-        require(msg.sender == IController(controller).proxy(), "403");
-        (bool success, bytes memory data) = target.call{value: value}(input);
-        require(success, "invoke failed");
-        return data;
+    fallback() external payable {
+        IController controller = IController(
+            StorageSlot.getAddressSlot(CONTROLLER_SLOT).value
+        );
+        require(msg.sender == controller.proxy(), "only proxy");
+        address target = controller.implementation();
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), target, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
     }
 
-    fallback() external payable {}
+    event Received(address sender, uint256 value);
 
-    receive() external payable {}
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
 }
